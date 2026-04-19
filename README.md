@@ -242,6 +242,104 @@ decant --no-tui
 decant --max-tokens 2000
 ```
 
+## Module API
+
+Decant can be imported as a module in your own TypeScript or JavaScript project using Bun.
+
+```bash
+bun add github:mtrifilo/decant  # or bun link after source install
+```
+
+```typescript
+import { clean, extract, decant } from 'decant';
+```
+
+### `decant(input, options?)` — default export
+
+The main entry point. Accepts an HTML string, a binary `Uint8Array` (DOCX/PDF/RTF), or a URL string (with `{ url: true }`). Auto-detects format and runs the pipeline.
+
+```typescript
+import decant from 'decant';
+
+// HTML string
+const { markdown, stats } = await decant('<html>...</html>');
+
+// DOCX buffer
+const buffer = await Bun.file('document.docx').bytes();
+const { markdown, stats } = await decant(buffer);
+
+// Fetch a URL
+const { markdown, stats } = await decant('https://example.com/article', { url: true });
+```
+
+### `clean()` and `extract()`
+
+Named wrappers that fix the pipeline mode.
+
+```typescript
+import { clean, extract } from 'decant';
+
+// Deterministic cleanup
+const { markdown } = await clean(htmlString);
+const { markdown } = await clean(docxBuffer, { keepLinks: false });
+
+// Readability-based extraction
+const { markdown } = await extract(htmlString);
+const { markdown } = await extract(htmlString, { aggressive: true });
+```
+
+### Options
+
+All options are optional — defaults match the CLI.
+
+```typescript
+interface DecantOptions {
+  mode?: 'clean' | 'extract';    // default: 'clean'
+  url?: boolean;                  // treat input string as a URL to fetch
+  fetchTimeoutMs?: number;        // URL fetch timeout (default: 15000)
+  keepLinks?: boolean;            // default: true
+  keepImages?: boolean;           // default: false
+  preserveTables?: boolean;       // default: true
+  maxHeadingLevel?: number;       // default: 6
+  aggressive?: boolean;           // default: false
+}
+```
+
+### Return value
+
+```typescript
+interface ProcessResult {
+  markdown: string;
+  stats: {
+    mode: 'clean' | 'extract';
+    inputChars: number;
+    outputChars: number;
+    inputTokensEstimate: number;
+    outputTokensEstimate: number;
+    charReduction: number;
+    charReductionPct: number;
+    tokenReduction: number;
+    tokenReductionPct: number;
+    sourceFormat?: string;    // 'html' | 'docx' | 'pdf' | 'rtf' | 'url'
+    sourceChars?: number;
+  };
+}
+```
+
+### Lower-level utilities
+
+All pipeline functions and types are re-exported for direct use:
+
+```typescript
+import {
+  processHtml, cleanHtml, extractContent, toMarkdown,
+  detectFormat, estimateTokens,
+  convertDocxToHtml, convertPdfToHtml, convertRtfToHtml,
+  parseMarkdownSections, truncateToTokenBudget,
+  fetchUrl,
+} from 'decant';
+```
+
 ## LLM Session Handoff
 
 For fast session resume and context-efficient drilldown:
