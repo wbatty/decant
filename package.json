@@ -19,7 +19,9 @@
     "build:binary": "bun build src/entry.ts --compile --outfile dist/decant",
     "package:manifests": "bun run scripts/generate-package-manager-manifests.ts",
     "update-golden": "bun run scripts/update-golden.ts",
-    "smoke-check": "bun run scripts/smoke-check.ts"
+    "smoke-check": "bun run scripts/smoke-check.ts",
+    "build": "tsc",
+    "prepare": "bun run build"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",

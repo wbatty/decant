@@ -33,7 +33,7 @@ function shouldFallbackToDeterministic(
 }
 
 export function extractContent(rawHtml: string, options: TransformOptions): ExtractResult {
-  const sourceDocument = new DOMParser().parseFromString(wrapHtml(rawHtml), "text/html");
+  const sourceDocument = new DOMParser().parseFromString(wrapHtml(rawHtml), "text/html") as unknown as Document;
   const fallbackHeading = sourceDocument.querySelector("article h1, main h1, h1")?.textContent?.trim();
   const originalTextLength = normalizedTextLength(
     sourceDocument.body.textContent ?? "",

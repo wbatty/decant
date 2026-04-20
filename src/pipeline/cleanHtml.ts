@@ -346,7 +346,7 @@ function pruneEmptyElements(document: Document): void {
 }
 
 export function cleanHtml(rawHtml: string, options: TransformOptions): CleanResult {
-  const document = new DOMParser().parseFromString(wrapHtml(rawHtml), "text/html");
+  const document = new DOMParser().parseFromString(wrapHtml(rawHtml), "text/html") as unknown as Document;
 
   for (const tag of NOISE_TAGS) {
     removeByTagName(document, tag);

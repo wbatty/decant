@@ -1,3 +1,3 @@
 #!/usr/bin/env bun
 
-await import("./cli.ts");
+import "./cli.ts";

@@ -4,6 +4,8 @@
  * content appears in the clean markdown output.
  */
 
+import type { TransformOptions } from "./types.ts";
+
 // --- Types ---
 
 export interface DiffLine {
