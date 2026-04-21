@@ -12,6 +12,13 @@ import {
 } from "../lib/rules";
 import type { CleanResult, TransformOptions } from "../lib/types";
 
+interface HtmlDoc {
+  getElementsByTagName(tagName: string): Iterable<Element>;
+  querySelectorAll(selector: string): Iterable<Element>;
+  createElement(tagName: string): Element;
+  body: Element;
+}
+
 const CONTENT_CANDIDATE_SELECTOR = "article,main,section,div";
 const CONTENT_PROTECTED_TAGS = new Set([
   "article", "main",
@@ -36,7 +43,7 @@ function normalizeWhitespace(value: string): string {
   return value.replace(textDecoderWhitespace, " ").trim();
 }
 
-function removeByTagName(document: Document, tagName: string): void {
+function removeByTagName(document: HtmlDoc, tagName: string): void {
   const nodes = [...document.getElementsByTagName(tagName)];
   for (const node of nodes) {
     node.remove();
@@ -113,7 +120,7 @@ function isLowValueContainer(el: Element): boolean {
   return text.length < 260;
 }
 
-function removeNoiseContainers(document: Document, aggressive: boolean): void {
+function removeNoiseContainers(document: HtmlDoc, aggressive: boolean): void {
   const elements = [...document.body.querySelectorAll("*")];
   for (const el of elements) {
     const tag = el.tagName.toLowerCase();
@@ -172,7 +179,7 @@ function sanitizeHref(value: string): string | null {
   }
 }
 
-function stripAttributes(document: Document): void {
+function stripAttributes(document: HtmlDoc): void {
   const elements = [...document.body.querySelectorAll("*")];
 
   for (const el of elements) {
@@ -209,7 +216,7 @@ function stripAttributes(document: Document): void {
   }
 }
 
-function unwrapElements(document: Document, selector: string): void {
+function unwrapElements(document: HtmlDoc, selector: string): void {
   const elements = [...document.querySelectorAll(selector)];
   for (const element of elements) {
     const parent = element.parentNode;
@@ -236,7 +243,7 @@ function replaceWithText(node: Element): void {
   parent.removeChild(node);
 }
 
-function normalizeHeadingLevels(document: Document, maxHeadingLevel: number): void {
+function normalizeHeadingLevels(document: HtmlDoc, maxHeadingLevel: number): void {
   const capped = Math.max(1, Math.min(6, Math.floor(maxHeadingLevel)));
   if (capped === 6) {
     return;
@@ -281,7 +288,7 @@ function scoreCandidate(el: Element): number {
   );
 }
 
-function isolatePrimaryContent(document: Document, aggressive: boolean): void {
+function isolatePrimaryContent(document: HtmlDoc, aggressive: boolean): void {
   const body = document.body;
   const bodyTextLength = textLength(body);
   if (bodyTextLength < 450) {
@@ -320,7 +327,7 @@ function isolatePrimaryContent(document: Document, aggressive: boolean): void {
   body.innerHTML = bestNode.outerHTML;
 }
 
-function pruneEmptyElements(document: Document): void {
+function pruneEmptyElements(document: HtmlDoc): void {
   let changed = true;
   while (changed) {
     changed = false;
@@ -346,7 +353,7 @@ function pruneEmptyElements(document: Document): void {
 }
 
 export function cleanHtml(rawHtml: string, options: TransformOptions): CleanResult {
-  const document = new DOMParser().parseFromString(wrapHtml(rawHtml), "text/html") as unknown as Document;
+  const document = new DOMParser().parseFromString(wrapHtml(rawHtml), "text/html") as unknown as HtmlDoc;
 
   for (const tag of NOISE_TAGS) {
     removeByTagName(document, tag);
