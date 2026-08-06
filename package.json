@@ -4,6 +4,10 @@
   "description": "CLI to clean noisy HTML and convert it to markdown for LLM context.",
   "type": "module",
   "private": true,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "bin": {
     "decant": "./src/entry.ts"
   },
@@ -15,7 +19,9 @@
     "build:binary": "bun build src/entry.ts --compile --outfile dist/decant",
     "package:manifests": "bun run scripts/generate-package-manager-manifests.ts",
     "update-golden": "bun run scripts/update-golden.ts",
-    "smoke-check": "bun run scripts/smoke-check.ts"
+    "smoke-check": "bun run scripts/smoke-check.ts",
+    "build": "tsc",
+    "prepare": "bun run build"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
